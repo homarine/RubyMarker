@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RubyMarker</title>
+  <style type="text/css">
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    textarea {
+      width: 98%;
+      height: 80px;
+      margin: 10px;
+    }
+
+    #copyButton {
+      display: block;
+      margin: 10px auto;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    #charCount {
+      text-align: center;
+      margin-top: 5px;
+    }
+  
+    .center-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    </style>
+</head>
+<body>
+<div class="center-wrapper">
+
+  <h1>RubyMarker</h1>
+  <p>カクヨム記法の振り仮名を@Wikiプラグインに変換します</p>
+
+  <div class="container">
+    <textarea id="input" tabindex="0" accesskey="i" placeholder="ここに入力（|漢字《ふりがな》）"></textarea>
+    <textarea id="output" tabindex="-1" placeholder="変換結果（&amp;ruby(ふりがな){漢字}）" readonly></textarea>
+  </div>
+  <div id="charCount">文字数: 0</div>
+
+  <button id="copyButton" tabindex="0" accesskey="c">変換後テキストをコピー</button>
+
+  <script>
+    const inputArea = document.getElementById('input');
+    const outputArea = document.getElementById('output');
+    const copyButton = document.getElementById('copyButton');
+    const charCount = document.getElementById('charCount');
+    const originalLabel = copyButton.textContent;
+
+    inputArea.addEventListener('input', () => {
+      const originalText = inputArea.value;
+      const transformedText = transformText(originalText);
+      outputArea.value = transformedText;
+
+      let text = originalText.replace(/\r?\n/g, ''); //改行削除
+      text = text.replace(/[\|｜](.+?)《(.+?)》/g, '$1$2'); //振り仮名マークアップ削除1
+      text = text.replace(/&ruby\((.+?)\)\{(.+?)\}/g, '$1$2'); //振り仮名マークアップ削除2
+      charCount.textContent = `文字数: ${text.length}`; //文字数カウント
+    });
+
+    function transformText(text) {
+      return text.replace(/[\|｜](.+?)《(.+?)》/g, '&ruby($2){$1}');      
+    }
+
+    copyButton.addEventListener('click', () => {
+      outputArea.select();
+      document.execCommand('copy');
+      copyButton.textContent = 'コピーしました！';
+      setTimeout(() => {
+        copyButton.textContent = originalLabel;
+      }, 1500);
+    });
+  </script>
+
+</div>
+</body>
+</html>
